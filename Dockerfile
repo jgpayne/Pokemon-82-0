@@ -6,9 +6,10 @@ RUN npm ci
 COPY . .
 RUN npm run test && npm run build
 
-# --- serve it ---
-FROM nginx:1.27-alpine
+# --- serve it (runs as the unprivileged nginx user, listens on 8080) ---
+FROM nginxinc/nginx-unprivileged:1.27-alpine
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1/healthz || exit 1
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
