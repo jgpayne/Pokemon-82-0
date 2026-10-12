@@ -1,49 +1,49 @@
-import { POKEDEX, type Pokemon, type PokeType } from '../data/pokedex'
+import { GENERATIONS, POKEDEX, type Pokemon, type PokeType } from '../data/pokedex'
 import { pick, shuffle, type Rng } from './rng'
 
 /**
- * A spin lands on two different types and deals from both, so a thin Gen 1
- * type (Bug, Fairy, Grass…) is always paired with a second pool instead of
- * being a dead spin. Occasionally it lands on a Wild card instead.
+ * Like 82-0's decade + team roll: a spin lands on a generation and a type, and
+ * deals Pokémon from that generation with that type. Each half can be
+ * re-rolled on its own with a separate budget.
  */
-export type SpinResult = { kind: 'pair'; types: [PokeType, PokeType] } | { kind: 'wild' }
-
-export const PER_TYPE = 3
-export const CHOICES_PER_SPIN = PER_TYPE * 2
-export const RESPINS = 3
-/** Chance a spin is a Wild card (any Pokémon) instead of a type pair. */
-export const WILD_CHANCE = 1 / 12
-
-/** Types with enough Gen 1 members to deal from. */
-export const SPIN_TYPES: PokeType[] = (() => {
-  const counts = new Map<PokeType, number>()
-  for (const p of POKEDEX) for (const t of p.types) counts.set(t, (counts.get(t) ?? 0) + 1)
-  return [...counts.entries()].filter(([, n]) => n >= 3).map(([t]) => t)
-})()
-
-export function spin(rng: Rng): SpinResult {
-  if (rng() < WILD_CHANCE) return { kind: 'wild' }
-  const a = pick(rng, SPIN_TYPES)
-  let b = pick(rng, SPIN_TYPES)
-  while (b === a) b = pick(rng, SPIN_TYPES)
-  return { kind: 'pair', types: [a, b] }
+export interface SpinResult {
+  gen: number
+  type: PokeType
 }
 
-export function spinLabel(result: SpinResult): string {
-  return result.kind === 'wild' ? 'Wild card' : `${result.types[0]} and ${result.types[1]}`
+export const CHOICES_PER_SPIN = 6
+export const GEN_REROLLS = 3
+export const TYPE_REROLLS = 3
+
+function poolFor(gen: number, type: PokeType, takenIds: ReadonlySet<number>): Pokemon[] {
+  return POKEDEX.filter((p) => p.gen === gen && p.types.includes(type) && !takenIds.has(p.id))
 }
 
-/** Up to 3 Pokémon of each spun type (topped up from the other if one runs dry), or 6 of any type on a Wild card. */
+function typesIn(gen: number, takenIds: ReadonlySet<number>): PokeType[] {
+  const set = new Set<PokeType>()
+  for (const p of POKEDEX) if (p.gen === gen && !takenIds.has(p.id)) for (const t of p.types) set.add(t)
+  return [...set]
+}
+
+/** A fresh generation + type. Only lands on combinations that still have undrafted Pokémon. */
+export function spin(rng: Rng, takenIds: ReadonlySet<number>): SpinResult {
+  const gen = pick(rng, GENERATIONS)
+  return { gen, type: pick(rng, typesIn(gen, takenIds)) }
+}
+
+/** Keep the generation, roll a different type that exists in it. */
+export function rerollType(rng: Rng, current: SpinResult, takenIds: ReadonlySet<number>): SpinResult {
+  const options = typesIn(current.gen, takenIds).filter((t) => t !== current.type)
+  return options.length ? { gen: current.gen, type: pick(rng, options) } : current
+}
+
+/** Keep the type, roll a different generation that has it. */
+export function rerollGen(rng: Rng, current: SpinResult, takenIds: ReadonlySet<number>): SpinResult {
+  const options = GENERATIONS.filter((g) => g !== current.gen && poolFor(g, current.type, takenIds).length > 0)
+  return options.length ? { gen: pick(rng, options), type: current.type } : current
+}
+
+/** Up to 6 undrafted Pokémon from the spun generation and type (fewer if the pool is thin). */
 export function choicesFor(rng: Rng, result: SpinResult, takenIds: ReadonlySet<number>): Pokemon[] {
-  const open = POKEDEX.filter((p) => !takenIds.has(p.id))
-  if (result.kind === 'wild') return shuffle(rng, open).slice(0, CHOICES_PER_SPIN)
-  const [a, b] = result.types
-  const first = shuffle(rng, open.filter((p) => p.types.includes(a))).slice(0, PER_TYPE)
-  const restB = shuffle(rng, open.filter((p) => p.types.includes(b) && !first.includes(p)))
-  const second = restB.slice(0, CHOICES_PER_SPIN - first.length)
-  // If the second type ran short, top up from the first type's remaining pool.
-  const topUp = shuffle(rng, open.filter((p) => p.types.includes(a) && !first.includes(p) && !second.includes(p)))
-  const deal = [...first, ...second, ...topUp].slice(0, CHOICES_PER_SPIN)
-  // Keep the shown order mixed but stable for the seed.
-  return shuffle(rng, deal)
+  return shuffle(rng, poolFor(result.gen, result.type, takenIds)).slice(0, CHOICES_PER_SPIN)
 }

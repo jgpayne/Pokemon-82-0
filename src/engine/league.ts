@@ -1,5 +1,5 @@
 import { getPokemonByName, type Pokemon } from '../data/pokedex'
-import { OPPONENTS, type Conference } from '../data/opponents'
+import { CONFERENCES, OPPONENTS, USER_CONFERENCE, type Conference } from '../data/opponents'
 import { BENCH_SLOTS, bestPosition, POSITIONS, positionOverall, teamOverall, type Roster, type Slot } from './ratings'
 import { makeRng, shuffle, type Rng } from './rng'
 import { simGame, type GameResult, type PlayerLine, type Team } from './sim'
@@ -48,7 +48,7 @@ export function userTeam(roster: Record<Slot, Pokemon>, name = 'Your Squad'): Te
     abbr: 'YOU',
     coach: 'You',
     color: '#EF4444',
-    conference: 'Indigo',
+    conference: USER_CONFERENCE,
     roster,
     isUser: true,
   }
@@ -113,7 +113,7 @@ function userSchedule(rng: Rng, opponents: Team[]): { opponentId: string; home: 
     games.push({ opponentId: o.id, home: true }, { opponentId: o.id, home: false })
   }
   // Fill to 82 with a third meeting, conference rivals first.
-  const extra = shuffle(rng, opponents).sort((a, b) => Number(b.conference === 'Indigo') - Number(a.conference === 'Indigo'))
+  const extra = shuffle(rng, opponents).sort((a, b) => Number(b.conference === USER_CONFERENCE) - Number(a.conference === USER_CONFERENCE))
   for (const o of extra.slice(0, SEASON_GAMES - games.length)) games.push({ opponentId: o.id, home: rng() < 0.5 })
   return shuffle(rng, games)
 }
@@ -226,7 +226,7 @@ export function runSeason(seed: string, roster: Record<Slot, Pokemon>, teamName?
   }
 
   const confChamps: { teamId: string; seed: number }[] = []
-  for (const conf of ['Indigo', 'Kanto'] as Conference[]) {
+  for (const conf of CONFERENCES) {
     const seeds = standings
       .filter((s) => byId.get(s.teamId)!.conference === conf)
       .slice(0, 8)

@@ -1,14 +1,14 @@
 # Poké 82-0 🏀
 
-An [82-0](https://www.82-0.com/)-style basketball draft game for Gen 1 Pokémon (inspired by [All 22 Pokémon](https://all22pokemon.com/play)).
+An [82-0](https://www.82-0.com/)-style basketball draft game for all 1,025 Pokémon (inspired by [All 22 Pokémon](https://all22pokemon.com/play)).
 Spin the type wheel, draft 8 Pokémon into PG / SG / SF / PF / C plus a 3-deep bench, then simulate an 82-game season
 and a 16-team playoff. Can your squad go **82-0**?
 
 ## How it plays
 
-1. **Spin & draft.** Each spin lands on two different types and deals 3 undrafted Pokémon of each (6 cards), or
-   occasionally a Wild card of 6 from anywhere. Pairing types keeps thin Gen 1 types like Bug and Fairy from being dead
-   spins. Pick one and place it on the court. You get 3 re-spins per draft. Tap a drafted Pokémon to move/swap positions.
+1. **Roll & draft.** Like 82-0's decade + team roll, each spin rolls a **generation** (I–IX) and a **type**, then deals up
+   to 6 undrafted Pokémon from that generation with that type. Re-roll either half on its own: you get **3 generation and
+   3 type re-rolls** per draft. Pick one and place it on the court. Tap a drafted Pokémon to move/swap positions.
 2. **Stats → basketball ratings** (`src/engine/ratings.ts`, scaled 25–99):
 
    | Rating | Built from |
@@ -26,8 +26,9 @@ and a 16-team playoff. Can your squad go **82-0**?
 3. **Season sim** (`src/engine/sim.ts`): a possession-by-possession game engine — turnovers, shot selection (3s vs. rim),
    contests by the matched defender plus rim protection, blocks, offensive rebounds, free throws, home court, and
    **type matchups** (a super-effective shooter gets a boost over their defender). Every game has a full box score.
-4. **League**: 29 Kanto clubs — the 8 Gym Leaders, the Elite Four, Blue, the Legendary Birds, Team Rocket, Ash, Prof. Oak and more,
-   in two 15-team conferences. Top 8 in each make the best-of-7 playoffs.
+4. **League**: 29 clubs led by champions, Elite Four members, gym leaders and villains from every region (Red, Cynthia,
+   Leon, Geeta, Cyrus with Dialga, N with Zekrom…), split into an East (Kanto–Sinnoh) and West (Unova–Paldea) conference
+   and tiered from gym-level to champion-level. Top 8 in each conference make the best-of-7 World Coronation Series.
 
 **Daily Challenge** uses a date seed so everyone gets the same spins; **Free Play** is random. Results can be shared as a
 link (`?seed=…`) that replays the same spins.
@@ -74,7 +75,7 @@ npm run build
 ## Project layout
 
 ```
-src/data/       pokemon.json (151 Pokémon, generated), opponents, type chart
+src/data/       pokemon.json (1,025 Pokémon, generated), opponents, type chart
 src/engine/     rng, ratings, draft, game sim, season + playoffs (pure TS, unit-tested)
 src/store/      Zustand game state
 src/screens/    Home, Draft, Season, Playoffs, Results

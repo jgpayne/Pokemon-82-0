@@ -41,7 +41,7 @@ export function Home() {
           POKÉ <span className="bg-gradient-to-r from-primary via-ball to-accent bg-clip-text text-transparent">82-0</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mx-auto mt-4 max-w-xl text-lg text-muted sm:text-xl">
-          Draft 8 Gen 1 Pokémon. Simulate an 82-game basketball season. <strong className="text-fg">Can your squad go undefeated?</strong>
+          Draft 8 Pokémon from any generation. Simulate an 82-game basketball season. <strong className="text-fg">Can your squad go undefeated?</strong>
         </motion.p>
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }} className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" variant="accent" onClick={() => start('daily')}>
@@ -62,9 +62,9 @@ export function Home() {
 
       <section className="mt-8 grid gap-4 md:grid-cols-3" aria-label="How to play">
         {[
-          { icon: Dices, title: '1. Spin & draft', body: 'Each spin lands on two types and deals 3 Pokémon of each. Pick 1 and slot it at PG, SG, SF, PF, C or the bench. 3 re-spins total.' },
+          { icon: Dices, title: '1. Spin & draft', body: 'Roll a generation and a type, then pick 1 of up to 6 matching Pokémon for PG, SG, SF, PF, C or the bench. 3 generation + 3 type re-rolls.' },
           { icon: Zap, title: '2. Stats become skills', body: 'Sp. Atk = shooting, Attack = finishing, Speed = playmaking, Def/Sp. Def = defense, HP + size = rebounding. Type matchups matter!' },
-          { icon: Trophy, title: '3. Chase perfection', body: 'Simulate 82 games against Gym Leaders, the Elite Four and more, then fight through a 16-team playoff for the Indigo League title.' },
+          { icon: Trophy, title: '3. Chase perfection', body: 'Simulate 82 games against champions, gym leaders and villains from every region, then fight through a 16-team playoff for the World Coronation title.' },
         ].map((s, i) => (
           <motion.div key={s.title} initial={{ y: 24, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
             <Panel className="h-full p-5">

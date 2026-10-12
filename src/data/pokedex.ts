@@ -20,6 +20,7 @@ export interface Pokemon {
   heightDm: number
   weightHg: number
   stats: BaseStats
+  gen: number
   stage: number
   chain: number
   evolves: boolean
@@ -27,6 +28,13 @@ export interface Pokemon {
 }
 
 export const POKEDEX = raw as Pokemon[]
+
+export const GENERATIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const
+export const REGIONS: Record<number, string> = {
+  1: 'Kanto', 2: 'Johto', 3: 'Hoenn', 4: 'Sinnoh', 5: 'Unova', 6: 'Kalos', 7: 'Alola', 8: 'Galar', 9: 'Paldea',
+}
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX']
+export const genLabel = (gen: number) => `Gen ${ROMAN[gen]}`
 
 const byId = new Map(POKEDEX.map((p) => [p.id, p]))
 const byName = new Map(POKEDEX.map((p) => [p.name.toLowerCase(), p]))

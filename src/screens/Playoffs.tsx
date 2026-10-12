@@ -6,9 +6,10 @@ import { Button, Panel, TeamLogo } from '../components/ui'
 import { cx } from '../lib/cx'
 import type { Series } from '../engine/league'
 import type { GameResult } from '../engine/sim'
+import { USER_CONFERENCE } from '../data/opponents'
 import { useGame } from '../store/game'
 
-const ROUND_NAMES = ['First Round', 'Conference Semifinals', 'Conference Finals', 'Indigo League Finals']
+const ROUND_NAMES = ['First Round', 'Conference Semifinals', 'Conference Finals', 'World Coronation Finals']
 
 export function Playoffs() {
   const season = useGame((s) => s.season)!
@@ -22,7 +23,7 @@ export function Playoffs() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="text-xs tracking-widest text-muted uppercase">Postseason</div>
-          <h1 className="font-display text-3xl sm:text-4xl">Indigo League Playoffs</h1>
+          <h1 className="font-display text-3xl sm:text-4xl">World Coronation Series</h1>
         </div>
         {round < 4 ? (
           <Button variant="primary" onClick={() => setRound(round + 1)}>
@@ -35,7 +36,7 @@ export function Playoffs() {
         )}
       </div>
       {season.finish === 'Missed Playoffs' && (
-        <Panel className="p-4 text-center text-loss">Your squad finished outside the top 8 in the Indigo Conference and missed the playoffs.</Panel>
+        <Panel className="p-4 text-center text-loss">Your squad finished outside the top 8 in the {USER_CONFERENCE} Conference and missed the playoffs.</Panel>
       )}
 
       {[1, 2, 3, 4].filter((r) => r <= round).map((r) => (
