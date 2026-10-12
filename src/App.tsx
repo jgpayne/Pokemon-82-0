@@ -1,6 +1,7 @@
-import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
+import { MotionConfig, motion } from 'framer-motion'
 import { Home as HomeIcon } from 'lucide-react'
 import { useEffect } from 'react'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Logo } from './components/ui'
 import { Draft } from './screens/Draft'
 import { Home } from './screens/Home'
@@ -63,15 +64,16 @@ export default function App() {
           )}
         </div>
       </header>
-      <AnimatePresence mode="wait">
-        <motion.main key={screen} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+      {/* Swap screens immediately (enter animation only) so navigation never waits on an exit animation. */}
+      <motion.main key={screen} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
+        <ErrorBoundary onReset={reset}>
           {screen === 'home' && <Home />}
           {screen === 'draft' && <Draft />}
           {screen === 'season' && <Season />}
           {screen === 'playoffs' && <Playoffs />}
           {screen === 'results' && <Results />}
-        </motion.main>
-      </AnimatePresence>
+        </ErrorBoundary>
+      </motion.main>
       <footer className="px-4 pb-8 text-center text-xs text-muted">
         Fan project. Pokémon and Pokémon character names are trademarks of Nintendo / Game Freak / The Pokémon Company. Data & art via PokeAPI.
       </footer>
