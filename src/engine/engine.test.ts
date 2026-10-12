@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getPokemonByName, POKEDEX } from '../data/pokedex'
 import { OPPONENTS } from '../data/opponents'
-import { choicesFor, spin, SPIN_TYPES } from './draft'
+import { choicesFor, rerollGen, rerollType, spin } from './draft'
 import { autoAssign, getAiTeams, runSeason } from './league'
 import { bestPosition, ratingsFor, teamOverall, type Roster } from './ratings'
 import { makeRng } from './rng'
@@ -37,45 +37,54 @@ describe('data', () => {
 })
 
 describe('draft', () => {
-  it('lands on two different types or a wild card', () => {
+  const none = new Set<number>()
+
+  it('rolls a generation and a type that has undrafted Pokémon', () => {
     const rng = makeRng('spins')
-    let wild = 0
+    const gens = new Set<number>()
     for (let i = 0; i < 500; i++) {
-      const res = spin(rng)
-      if (res.kind === 'wild') {
-        wild++
-        continue
-      }
-      expect(res.types[0]).not.toBe(res.types[1])
-      for (const t of res.types) expect(SPIN_TYPES).toContain(t)
+      const res = spin(rng, none)
+      gens.add(res.gen)
+      expect(choicesFor(rng, res, none).length).toBeGreaterThan(0)
     }
-    expect(wild).toBeGreaterThan(10)
-    expect(wild).toBeLessThan(90)
+    expect(gens.size).toBe(9)
   })
 
-  it('deals 6 undrafted Pokémon, 3 from each spun type when available', () => {
+  it('deals up to 6 undrafted Pokémon matching both the generation and the type', () => {
     const rng = makeRng('draft')
     const taken = new Set([25, 6, 150])
     for (let i = 0; i < 300; i++) {
-      const res = spin(rng)
+      const res = spin(rng, taken)
       const choices = choicesFor(rng, res, taken)
-      expect(choices).toHaveLength(6)
-      expect(new Set(choices.map((c) => c.id)).size).toBe(6)
-      for (const c of choices) expect(taken.has(c.id)).toBe(false)
-      if (res.kind === 'pair') {
-        const [a, b] = res.types
-        for (const c of choices) expect(c.types.includes(a) || c.types.includes(b)).toBe(true)
-        expect(choices.filter((c) => c.types.includes(a)).length).toBeGreaterThanOrEqual(3)
+      expect(choices.length).toBeGreaterThan(0)
+      expect(choices.length).toBeLessThanOrEqual(6)
+      expect(new Set(choices.map((c) => c.id)).size).toBe(choices.length)
+      for (const c of choices) {
+        expect(taken.has(c.id)).toBe(false)
+        expect(c.gen).toBe(res.gen)
+        expect(c.types).toContain(res.type)
       }
     }
   })
 
-  it('tops up from the other type when one pool is nearly drafted out', () => {
-    const rng = makeRng('thin')
-    const dragons = POKEDEX.filter((p) => p.types.includes('dragon')).map((p) => p.id)
-    const choices = choicesFor(rng, { kind: 'pair', types: ['dragon', 'water'] }, new Set(dragons))
-    expect(choices).toHaveLength(6)
-    for (const c of choices) expect(c.types).toContain('water')
+  it('re-rolls only the requested half', () => {
+    const rng = makeRng('reroll')
+    for (let i = 0; i < 200; i++) {
+      const res = spin(rng, none)
+      const t = rerollType(rng, res, none)
+      expect(t.gen).toBe(res.gen)
+      expect(t.type).not.toBe(res.type)
+      const g = rerollGen(rng, res, none)
+      expect(g.type).toBe(res.type)
+      expect(g.gen).not.toBe(res.gen)
+      expect(choicesFor(rng, g, none).length).toBeGreaterThan(0)
+    }
+  })
+
+  it('never re-rolls into an empty combination (Gen 1 has no Dark types)', () => {
+    const rng = makeRng('dark')
+    for (let i = 0; i < 100; i++) expect(rerollGen(rng, { gen: 2, type: 'dark' }, none).gen).not.toBe(1)
+    for (let i = 0; i < 100; i++) expect(rerollType(rng, { gen: 1, type: 'fire' }, none).type).not.toBe('dark')
   })
 })
 
@@ -129,7 +138,7 @@ describe('balance', () => {
   }
 
   it('rewards a stacked draft and punishes a weak one', () => {
-    const dream = autoAssign(names(['Mewtwo', 'Dragonite', 'Snorlax', 'Gengar', 'Alakazam', 'Zapdos', 'Gyarados', 'Starmie']))
+    const dream = autoAssign(names(['Mewtwo', 'Rayquaza', 'Dragonite', 'Garchomp', 'Metagross', 'Tyranitar', 'Snorlax', 'Kyogre']))
     const weak = autoAssign(names(['Magikarp', 'Caterpie', 'Weedle', 'Metapod', 'Kakuna', 'Pidgey', 'Rattata', 'Diglett']))
     const dreamWins = seasonWins(dream, 20)
     const weakWins = seasonWins(weak, 5)

@@ -60,7 +60,7 @@ interface SimTeam {
 }
 
 // Tuning knobs. RATING_EDGE converts a one-point rating gap into make-probability.
-const RATING_EDGE = 0.0036
+const RATING_EDGE = 0.004
 const HOME_EDGE = 0.012
 const BENCH_WEIGHTS = [0.45, 0.33, 0.22]
 

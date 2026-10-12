@@ -66,21 +66,43 @@ export function Draft() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-xs tracking-widest text-muted uppercase">Pick {filled + 1} of 8</div>
-                <h2 className="font-display text-2xl">Spin the type wheels</h2>
+                <h2 className="font-display text-2xl">Roll a generation &amp; type</h2>
               </div>
-              <div className="flex gap-2">
-                {!g.current ? (
-                  <Button onClick={g.doSpin} variant="primary">
-                    <Dices className="h-5 w-5" aria-hidden /> Spin
-                  </Button>
-                ) : (
-                  <Button onClick={g.respin} variant="ghost" size="sm" disabled={g.respins <= 0 || !showChoices}>
-                    <RefreshCw className="h-4 w-4" aria-hidden /> Re-spin ({g.respins})
-                  </Button>
-                )}
-              </div>
+              {!g.current && (
+                <Button onClick={g.doSpin} variant="primary">
+                  <Dices className="h-5 w-5" aria-hidden /> Spin
+                </Button>
+              )}
             </div>
-            <SpinReel key={g.spinCount} result={g.current?.result ?? null} spinKey={g.spinCount} onDone={() => setRevealedSpin(g.spinCount)} />
+            <SpinReel
+              key={g.spinCount}
+              result={g.current?.result ?? null}
+              rolled={g.current?.rolled ?? 'both'}
+              spinKey={g.spinCount}
+              onDone={() => setRevealedSpin(g.spinCount)}
+            />
+            {g.current && (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  onClick={g.rerollGen}
+                  variant="ghost"
+                  size="sm"
+                  disabled={g.genRerolls <= 0 || !showChoices}
+                  aria-label={`Re-roll generation, ${g.genRerolls} left`}
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Re-roll</span> Gen ({g.genRerolls})
+                </Button>
+                <Button
+                  onClick={g.rerollType}
+                  variant="ghost"
+                  size="sm"
+                  disabled={g.typeRerolls <= 0 || !showChoices}
+                  aria-label={`Re-roll type, ${g.typeRerolls} left`}
+                >
+                  <RefreshCw className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Re-roll</span> Type ({g.typeRerolls})
+                </Button>
+              </div>
+            )}
             <AnimatePresence mode="wait">
               {showChoices ? (
                 <motion.div key={g.spinCount} className="grid grid-cols-2 gap-3 sm:grid-cols-3" exit={{ opacity: 0 }}>
@@ -104,8 +126,8 @@ export function Draft() {
                 !g.current && (
                   <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border-2 border-dashed border-line p-8 text-center text-muted">
                     <Sparkles className="mx-auto mb-2 h-8 w-8 text-accent" aria-hidden />
-                    Each spin lands on two types and deals you 3 Pokémon of each. Pick one, then place it on the court.
-                    You get {g.respins} re-spins for the whole draft — use them wisely.
+                    Each spin rolls a generation and a type, then deals up to 6 Pokémon that match both. Pick one and place it on the
+                    court. Don't like the roll? You get {g.genRerolls} generation and {g.typeRerolls} type re-rolls for the whole draft.
                   </motion.div>
                 )
               )}

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { heightLabel, TYPE_COLORS, weightLabel, type Pokemon } from '../data/pokedex'
+import { genLabel, heightLabel, TYPE_COLORS, weightLabel, type Pokemon } from '../data/pokedex'
 import { bestPosition, ratingsFor, RATING_LABELS, slotOverall, type RatingKey, type Slot } from '../engine/ratings'
 import { OvrChip, RatingBar, Sprite, TypeBadge } from './ui'
 import { cx } from '../lib/cx'
@@ -45,7 +45,7 @@ export function PokemonCard({
       />
       <div className="relative flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-[11px] text-muted tabular-nums">#{String(mon.id).padStart(3, '0')}</div>
+          <div className="text-[11px] text-muted tabular-nums">#{String(mon.id).padStart(4, '0')} · {genLabel(mon.gen)}</div>
           <div className="truncate font-display text-base leading-tight sm:text-lg">{mon.name}</div>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">

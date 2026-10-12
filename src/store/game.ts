@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { Pokemon } from '../data/pokedex'
-import { choicesFor, RESPINS, spin, type SpinResult } from '../engine/draft'
+import { choicesFor, GEN_REROLLS, rerollGen, rerollType, spin, TYPE_REROLLS, type SpinResult } from '../engine/draft'
 import { runSeason, type SeasonResult } from '../engine/league'
 import { SLOTS, type Roster, type Slot } from '../engine/ratings'
 import { dailySeed, makeRng, randomSeed, type Rng } from '../engine/rng'
@@ -14,8 +14,10 @@ interface GameState {
   seed: string
   rng: Rng
   roster: Roster
-  respins: number
-  current: { result: SpinResult; choices: Pokemon[] } | null
+  genRerolls: number
+  typeRerolls: number
+  /** `rolled` says which reel(s) animate for this result. */
+  current: { result: SpinResult; choices: Pokemon[]; rolled: 'both' | 'gen' | 'type' } | null
   spinCount: number
   selected: { kind: 'choice'; mon: Pokemon } | { kind: 'slot'; slot: Slot } | null
   teamName: string
@@ -24,7 +26,8 @@ interface GameState {
 
   start: (mode: Mode, seed?: string) => void
   doSpin: () => void
-  respin: () => void
+  rerollGen: () => void
+  rerollType: () => void
   select: (sel: GameState['selected']) => void
   placeAt: (slot: Slot) => void
   setTeamName: (name: string) => void
@@ -71,7 +74,8 @@ export const useGame = create<GameState>((set, get) => ({
   seed: '',
   rng: makeRng(0),
   roster: {},
-  respins: RESPINS,
+  genRerolls: GEN_REROLLS,
+  typeRerolls: TYPE_REROLLS,
   current: null,
   spinCount: 0,
   selected: null,
@@ -87,7 +91,8 @@ export const useGame = create<GameState>((set, get) => ({
       seed: s,
       rng: makeRng(`${s}:draft`),
       roster: {},
-      respins: RESPINS,
+      genRerolls: GEN_REROLLS,
+      typeRerolls: TYPE_REROLLS,
       current: null,
       spinCount: 0,
       selected: null,
@@ -98,14 +103,35 @@ export const useGame = create<GameState>((set, get) => ({
 
   doSpin: () => {
     const { rng, roster } = get()
-    const result = spin(rng)
-    set((st) => ({ current: { result, choices: choicesFor(rng, result, takenIds(roster)) }, selected: null, spinCount: st.spinCount + 1 }))
+    const taken = takenIds(roster)
+    const result = spin(rng, taken)
+    set((st) => ({ current: { result, choices: choicesFor(rng, result, taken), rolled: 'both' }, selected: null, spinCount: st.spinCount + 1 }))
   },
 
-  respin: () => {
-    if (get().respins <= 0) return
-    set((s) => ({ respins: s.respins - 1 }))
-    get().doSpin()
+  rerollGen: () => {
+    const { rng, roster, current, genRerolls } = get()
+    if (!current || genRerolls <= 0) return
+    const taken = takenIds(roster)
+    const result = rerollGen(rng, current.result, taken)
+    set((st) => ({
+      current: { result, choices: choicesFor(rng, result, taken), rolled: 'gen' },
+      genRerolls: st.genRerolls - 1,
+      selected: null,
+      spinCount: st.spinCount + 1,
+    }))
+  },
+
+  rerollType: () => {
+    const { rng, roster, current, typeRerolls } = get()
+    if (!current || typeRerolls <= 0) return
+    const taken = takenIds(roster)
+    const result = rerollType(rng, current.result, taken)
+    set((st) => ({
+      current: { result, choices: choicesFor(rng, result, taken), rolled: 'type' },
+      typeRerolls: st.typeRerolls - 1,
+      selected: null,
+      spinCount: st.spinCount + 1,
+    }))
   },
 
   select: (selected) => set({ selected }),

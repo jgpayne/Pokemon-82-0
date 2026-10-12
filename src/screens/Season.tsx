@@ -6,6 +6,7 @@ import { Button, Panel, TeamLogo } from '../components/ui'
 import { cx } from '../lib/cx'
 import type { ScheduledGame } from '../engine/league'
 import type { Team } from '../engine/sim'
+import { CONFERENCE_REGIONS, USER_CONFERENCE } from '../data/opponents'
 import { useGame } from '../store/game'
 
 const SPEEDS = [
@@ -203,10 +204,11 @@ function LiveStandings() {
   const revealed = useGame((s) => s.revealed)
   const done = revealed >= season.games.length
   const teams = new Map(season.teams.map((t) => [t.id, t]))
-  const rows = season.standings.filter((s) => teams.get(s.teamId)!.conference === 'Indigo')
+  const rows = season.standings.filter((s) => teams.get(s.teamId)!.conference === USER_CONFERENCE)
   return (
     <Panel className="p-4">
-      <h2 className="mb-2 font-display text-lg">Indigo Conference</h2>
+      <h2 className="font-display text-lg">{USER_CONFERENCE} Conference</h2>
+      <p className="mb-2 text-xs text-muted">{CONFERENCE_REGIONS[USER_CONFERENCE]}</p>
       {!done ? (
         <p className="text-sm text-muted">Final standings post when the regular season ends.</p>
       ) : (
