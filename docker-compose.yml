@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    image: poke-82-0:latest
+    ports:
+      - "${PORT:-8080}:80"
+    restart: unless-stopped
+
+  tunnel:
+    build:
+      context: docker
+      dockerfile: tunnel.Dockerfile
+    image: poke-82-0-tunnel:latest
+    environment:
+      CLOUDFLARE_TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+      TUNNEL_TARGET: http://web:80
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
