@@ -66,7 +66,7 @@ export function Draft() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-xs tracking-widest text-muted uppercase">Pick {filled + 1} of 8</div>
-                <h2 className="font-display text-2xl">Spin the type wheel</h2>
+                <h2 className="font-display text-2xl">Spin the type wheels</h2>
               </div>
               <div className="flex gap-2">
                 {!g.current ? (
@@ -104,7 +104,7 @@ export function Draft() {
                 !g.current && (
                   <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="rounded-2xl border-2 border-dashed border-line p-8 text-center text-muted">
                     <Sparkles className="mx-auto mb-2 h-8 w-8 text-accent" aria-hidden />
-                    Each spin lands on a type and deals you up to 5 Pokémon of that type. Pick one, then place it on the court.
+                    Each spin lands on two types and deals you 3 Pokémon of each. Pick one, then place it on the court.
                     You get {g.respins} re-spins for the whole draft — use them wisely.
                   </motion.div>
                 )

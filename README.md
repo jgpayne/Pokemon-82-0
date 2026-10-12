@@ -6,17 +6,18 @@ and a 16-team playoff. Can your squad go **82-0**?
 
 ## How it plays
 
-1. **Spin & draft.** Each spin lands on a type (or a Wild card) and deals up to 5 undrafted Pokémon of that type.
-   Pick one and place it on the court. You get 3 re-spins per draft. Tap a drafted Pokémon to move/swap positions.
+1. **Spin & draft.** Each spin lands on two different types and deals 3 undrafted Pokémon of each (6 cards), or
+   occasionally a Wild card of 6 from anywhere. Pairing types keeps thin Gen 1 types like Bug and Fairy from being dead
+   spins. Pick one and place it on the court. You get 3 re-spins per draft. Tap a drafted Pokémon to move/swap positions.
 2. **Stats → basketball ratings** (`src/engine/ratings.ts`, scaled 25–99):
 
    | Rating | Built from |
    | --- | --- |
-   | Shooting | Sp. Atk (+ Speed) |
-   | Finishing | Attack + size + Speed |
+   | Shooting | Sp. Atk (+ a little Speed) |
+   | Finishing | Attack + size |
    | Playmaking | Speed + Sp. Atk |
-   | Perimeter D | Speed + Sp. Def |
-   | Interior D | Defense + size |
+   | Perimeter D | Speed + Sp. Def + Defense |
+   | Interior D | Defense + HP + size |
    | Rebounding | HP + size (height & weight) + Attack |
    | Athleticism / Stamina | Speed / HP |
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getPokemonByName, POKEDEX } from '../data/pokedex'
 import { OPPONENTS } from '../data/opponents'
-import { choicesFor, spin, WHEEL } from './draft'
+import { choicesFor, spin, SPIN_TYPES } from './draft'
 import { autoAssign, getAiTeams, runSeason } from './league'
 import { bestPosition, ratingsFor, teamOverall, type Roster } from './ratings'
 import { makeRng } from './rng'
@@ -37,20 +37,45 @@ describe('data', () => {
 })
 
 describe('draft', () => {
-  it('offers up to five matching, undrafted choices', () => {
-    const rng = makeRng('draft')
-    for (let i = 0; i < 50; i++) {
+  it('lands on two different types or a wild card', () => {
+    const rng = makeRng('spins')
+    let wild = 0
+    for (let i = 0; i < 500; i++) {
       const res = spin(rng)
-      expect(WHEEL).toContain(res)
-      const taken = new Set([25, 6])
+      if (res.kind === 'wild') {
+        wild++
+        continue
+      }
+      expect(res.types[0]).not.toBe(res.types[1])
+      for (const t of res.types) expect(SPIN_TYPES).toContain(t)
+    }
+    expect(wild).toBeGreaterThan(10)
+    expect(wild).toBeLessThan(90)
+  })
+
+  it('deals 6 undrafted Pokémon, 3 from each spun type when available', () => {
+    const rng = makeRng('draft')
+    const taken = new Set([25, 6, 150])
+    for (let i = 0; i < 300; i++) {
+      const res = spin(rng)
       const choices = choicesFor(rng, res, taken)
-      expect(choices.length).toBeGreaterThanOrEqual(3)
-      expect(choices.length).toBeLessThanOrEqual(5)
-      for (const c of choices) {
-        expect(taken.has(c.id)).toBe(false)
-        if (res !== 'wild') expect(c.types).toContain(res)
+      expect(choices).toHaveLength(6)
+      expect(new Set(choices.map((c) => c.id)).size).toBe(6)
+      for (const c of choices) expect(taken.has(c.id)).toBe(false)
+      if (res.kind === 'pair') {
+        const [a, b] = res.types
+        for (const c of choices) expect(c.types.includes(a) || c.types.includes(b)).toBe(true)
+        expect(choices.filter((c) => c.types.includes(a)).length).toBeGreaterThanOrEqual(3)
       }
     }
+  })
+
+  it('tops up from the other type when one pool is nearly drafted out', () => {
+    const rng = makeRng('thin')
+    const dragons = POKEDEX.filter((p) => p.types.includes('dragon')).map((p) => p.id)
+    const choices = choicesFor(rng, { kind: 'pair', types: ['dragon', 'water'] }, new Set(dragons))
+    expect(choices).toHaveLength(6)
+    for (const c of choices) expect(c.types).toContain('water')
   })
 })
 

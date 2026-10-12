@@ -62,16 +62,19 @@ const cache = new Map<number, Ratings>()
 export function ratingsFor(p: Pokemon): Ratings {
   const hit = cache.get(p.id)
   if (hit) return hit
-  const s = (v: number) => lin(v, 20, 150)
+  // 140 (not 150) as the top of the scale lifts mid-tier evolved Pokémon. Speed is kept out
+  // of finishing and trimmed elsewhere so slow, bulky Pokémon (Snorlax, Muk, Venusaur) rate
+  // as real frontcourt players instead of being buried by one stat.
+  const s = (v: number) => lin(v, 20, 140)
   const { hp, atk, def, spa, spd, spe } = p.stats
   const size = sizeFactor(p)
   const r: Ratings = {
-    shooting: toRating(0.75 * s(spa) + 0.25 * s(spe)),
-    finishing: toRating(0.6 * s(atk) + 0.25 * size + 0.15 * s(spe)),
-    playmaking: toRating(0.55 * s(spe) + 0.45 * s(spa)),
-    perimeterD: toRating(0.5 * s(spe) + 0.5 * s(spd)),
-    interiorD: toRating(0.55 * s(def) + 0.45 * size),
-    rebounding: toRating(0.35 * s(hp) + 0.5 * size + 0.15 * s(atk)),
+    shooting: toRating(0.8 * s(spa) + 0.2 * s(spe)),
+    finishing: toRating(0.65 * s(atk) + 0.35 * size),
+    playmaking: toRating(0.5 * s(spe) + 0.5 * s(spa)),
+    perimeterD: toRating(0.4 * s(spe) + 0.4 * s(spd) + 0.2 * s(def)),
+    interiorD: toRating(0.45 * s(def) + 0.2 * s(hp) + 0.35 * size),
+    rebounding: toRating(0.35 * s(hp) + 0.45 * size + 0.2 * s(atk)),
     athleticism: toRating(s(spe)),
     stamina: toRating(s(hp)),
   }
