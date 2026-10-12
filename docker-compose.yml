@@ -14,6 +14,14 @@ services:
     environment:
       CLOUDFLARE_TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
       TUNNEL_TARGET: http://web:80
+      TUNNEL_PROTOCOL: ${TUNNEL_PROTOCOL:-http2}
+    healthcheck:
+      # Healthy only while at least one connection to Cloudflare is registered.
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:2000/ready"]
+      interval: 15s
+      timeout: 3s
+      start_period: 20s
+      retries: 3
     depends_on:
       web:
         condition: service_healthy

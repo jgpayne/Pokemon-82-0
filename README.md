@@ -44,6 +44,10 @@ docker compose up --build -d
 - The game is at http://localhost:8080 (change with `PORT` in `.env`).
 - The `tunnel` service runs `cloudflared`. With no token it opens a **free quick tunnel** — no Cloudflare account needed —
   and prints a public `https://*.trycloudflare.com` URL (new URL each restart; also visible with `docker compose logs tunnel`).
+  `docker compose ps` shows the tunnel as `healthy` only while it is connected to Cloudflare.
+- **Cloudflare error 1033** means the URL exists but no `cloudflared` is connected behind it. Either the container restarted
+  (old quick-tunnel URLs die; run `./scripts/tunnel-url.sh` for the current one) or it can't reach Cloudflare. The tunnel uses
+  HTTP/2 over TCP 443 by default because QUIC (UDP 7844) is often blocked on home networks; set `TUNNEL_PROTOCOL` in `.env` to change it.
 - For a **stable URL on your own domain**, create a tunnel in Cloudflare Zero Trust → Networks → Tunnels, point its public
   hostname at `http://web:80`, and put the token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. The same compose file then runs it as a named tunnel.
 
