@@ -42,7 +42,7 @@ export function TypeBadge({ type, size = 'sm' }: { type: PokeType | 'wild'; size
     <span
       className={cx(
         'inline-flex items-center rounded-md font-display uppercase tracking-wider text-slate-950',
-        size === 'sm' ? 'px-1.5 py-0.5 text-[11px]' : 'px-4 py-1.5 text-2xl',
+        size === 'sm' ? 'px-1.5 py-0.5 text-[11px]' : 'px-2.5 py-1 text-lg sm:px-4 sm:py-1.5 sm:text-2xl',
       )}
       style={{ background: type === 'wild' ? 'linear-gradient(90deg,#f43f5e,#facc15,#22c55e,#3b82f6)' : color }}
     >

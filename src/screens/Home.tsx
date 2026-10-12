@@ -62,7 +62,7 @@ export function Home() {
 
       <section className="mt-8 grid gap-4 md:grid-cols-3" aria-label="How to play">
         {[
-          { icon: Dices, title: '1. Spin & draft', body: 'Each spin lands on a type. Pick 1 of up to 5 Pokémon and slot them at PG, SG, SF, PF, C or the bench. 3 re-spins total.' },
+          { icon: Dices, title: '1. Spin & draft', body: 'Each spin lands on two types and deals 3 Pokémon of each. Pick 1 and slot it at PG, SG, SF, PF, C or the bench. 3 re-spins total.' },
           { icon: Zap, title: '2. Stats become skills', body: 'Sp. Atk = shooting, Attack = finishing, Speed = playmaking, Def/Sp. Def = defense, HP + size = rebounding. Type matchups matter!' },
           { icon: Trophy, title: '3. Chase perfection', body: 'Simulate 82 games against Gym Leaders, the Elite Four and more, then fight through a 16-team playoff for the Indigo League title.' },
         ].map((s, i) => (
