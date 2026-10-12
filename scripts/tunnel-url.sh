@@ -7,7 +7,9 @@ latest_run() {
     awk '/Starting free Cloudflare quick tunnel/ { buf = "" } { buf = buf $0 "\n" } END { printf "%s", buf }'
 }
 
-for _ in $(seq 1 45); do
+# Up to ~4 minutes: on networks that drop some port 7844 attempts, cloudflared
+# can take a couple of minutes of retries before it connects.
+for _ in $(seq 1 120); do
   run=$(latest_run)
   url=$(printf '%s' "$run" | grep -o 'https://[a-z0-9-]*\.trycloudflare\.com' | tail -1)
   if [ -n "$url" ] && printf '%s' "$run" | grep -q 'Registered tunnel connection'; then
@@ -22,5 +24,5 @@ if [ -n "$url" ]; then
 else
   echo "No quick-tunnel URL yet." >&2
 fi
-echo "Check: docker compose logs tunnel" >&2
+echo "Check: docker compose logs tunnel (\"dial tcp ...:7844: i/o timeout\" means a firewall is blocking port 7844)" >&2
 exit 1

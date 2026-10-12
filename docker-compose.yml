@@ -20,7 +20,8 @@ services:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:2000/ready"]
       interval: 15s
       timeout: 3s
-      start_period: 20s
+      # cloudflared may need a few minutes of retries on firewalled networks.
+      start_period: 3m
       retries: 3
     depends_on:
       web:

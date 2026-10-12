@@ -47,7 +47,10 @@ docker compose up --build -d
   `docker compose ps` shows the tunnel as `healthy` only while it is connected to Cloudflare.
 - **Cloudflare error 1033** means the URL exists but no `cloudflared` is connected behind it. Either the container restarted
   (old quick-tunnel URLs die; run `./scripts/tunnel-url.sh` for the current one) or it can't reach Cloudflare. The tunnel uses
-  HTTP/2 over TCP 443 by default because QUIC (UDP 7844) is often blocked on home networks; set `TUNNEL_PROTOCOL` in `.env` to change it.
+  HTTP/2 by default (TCP port 7844) because QUIC (UDP port 7844) is more often blocked; set `TUNNEL_PROTOCOL` in `.env` to change it.
+  Either way the network must allow **outbound port 7844** to Cloudflare. If the logs show `dial tcp …:7844: i/o timeout`, a
+  firewall is dropping it: cloudflared keeps retrying other Cloudflare servers and may connect after a minute or two, but a
+  network that blocks 7844 entirely (common on corporate/managed networks) can't run the tunnel.
 - For a **stable URL on your own domain**, create a tunnel in Cloudflare Zero Trust → Networks → Tunnels, point its public
   hostname at `http://web:80`, and put the token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. The same compose file then runs it as a named tunnel.
 

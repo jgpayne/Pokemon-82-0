@@ -3,9 +3,10 @@
 # Cloudflare dashboard); otherwise a free, account-less quick tunnel on a
 # random https://*.trycloudflare.com URL.
 #
-# Defaults to HTTP/2 over TCP 443: cloudflared's default QUIC transport needs
-# outbound UDP 7844, which many home routers and Docker Desktop setups drop,
-# leaving the URL up but unconnected (Cloudflare error 1033).
+# cloudflared reaches Cloudflare's edge on port 7844 with either transport:
+# QUIC (its default) over UDP, or HTTP/2 over TCP. UDP 7844 is the one most
+# often dropped by home routers and Docker Desktop, leaving the URL up but
+# unconnected (Cloudflare error 1033), so this defaults to HTTP/2.
 set -e
 TARGET="${TUNNEL_TARGET:-http://web:80}"
 PROTOCOL="${TUNNEL_PROTOCOL:-http2}"
