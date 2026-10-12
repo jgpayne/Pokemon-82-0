@@ -27,7 +27,10 @@ export default function App() {
     }
   }, [start])
 
-  useEffect(() => window.scrollTo({ top: 0 }), [screen])
+  // Braces matter: newer browsers return a Promise from scrollTo, which React would call as the cleanup.
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  }, [screen])
 
   return (
     <MotionConfig reducedMotion="user">
