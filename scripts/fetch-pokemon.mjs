@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Builds src/data/pokemon.json and public/sprites/*.webp for Gen 1 (#1–151)
+// Builds src/data/pokemon.json and public/sprites/*.webp for every species (#1–1025)
 // from the PokeAPI data + sprites repos on GitHub. Output is committed, so the
 // Docker build never needs network access. Requires ImageMagick (`convert`).
 import { execFileSync } from 'node:child_process'
@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const CSV = 'https://raw.githubusercontent.com/PokeAPI/pokeapi/master/data/v2/csv/'
 const ART = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/'
-const MAX_ID = 151
+const MAX_ID = 1025
 
 async function csv(name) {
   const res = await fetch(CSV + name + '.csv')
@@ -57,6 +57,7 @@ for (let id = 1; id <= MAX_ID; id++) {
     heightDm: +p.height,
     weightHg: +p.weight,
     stats: base,
+    gen: +sp.generation_id,
     stage: stage(id),
     chain: +sp.evolution_chain_id,
     evolves: species.some((s) => s.evolves_from_species_id === String(id)),
