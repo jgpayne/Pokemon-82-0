@@ -30,6 +30,24 @@ and a 16-team playoff. Can your squad go **82-0**?
    Leon, Geeta, Cyrus with Dialga, N with Zekrom…), split into an East (Kanto–Sinnoh) and West (Unova–Paldea) conference
    and tiered from gym-level to champion-level. Top 8 in each conference make the best-of-7 World Coronation Series.
 
+5. **Play it yourself**: after the draft (or from the season recap), take your team onto the court in a live, NBA Jam-style
+   5-on-5 game (~5 minutes, four 75-second quarters). Climb the **Gym Challenge** — 8 gym leaders, the Elite Four
+   (Lance, Cynthia, Blue, Red) and Champion Leon, each unlocking the next and getting tougher — or play an
+   **Exhibition** against any club. Ratings still drive everything: speed, shooting/finishing, steals and blocks,
+   rebounding reach, stamina and type matchups. Hit three in a row and you're **on fire**.
+
+   | Action | Keyboard | Touch |
+   | --- | --- | --- |
+   | Move | Arrows / WASD | Left stick |
+   | Shoot (hold, release in the green zone) · steal/block on defense | J / Space | A (Shoot/Steal) |
+   | Pass · switch defender on defense | K | B (Pass/Switch) |
+   | Turbo | Shift | Turbo |
+   | Pause | Esc / P | Pause button |
+
+   On phones the court turns vertical in portrait, with the controls in a bar below it. Gym Challenge progress is saved
+   per drafted roster in your browser. The live game lives in `src/play/` (engine, renderer, input), and the engine runs
+   headless in tests.
+
 **Daily Challenge** uses a date seed so everyone gets the same spins; **Free Play** is random. Results can be shared as a
 link (`?seed=…`) that replays the same spins.
 

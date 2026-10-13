@@ -5,7 +5,7 @@ import { runSeason, type SeasonResult } from '../engine/league'
 import { SLOTS, type Roster, type Slot } from '../engine/ratings'
 import { dailySeed, makeRng, randomSeed, type Rng } from '../engine/rng'
 
-export type Screen = 'home' | 'draft' | 'season' | 'playoffs' | 'results'
+export type Screen = 'home' | 'draft' | 'season' | 'playoffs' | 'results' | 'arena' | 'game'
 export type Mode = 'daily' | 'free'
 
 interface GameState {
@@ -23,6 +23,9 @@ interface GameState {
   teamName: string
   season: SeasonResult | null
   revealed: number
+  /** Screen to return to from the arena (where the player came from). */
+  arenaFrom: Screen
+  match: Match | null
 
   start: (mode: Mode, seed?: string) => void
   doSpin: () => void
@@ -35,7 +38,22 @@ interface GameState {
   setRevealed: (n: number) => void
   goto: (screen: Screen) => void
   reset: () => void
+  openArena: () => void
+  startMatch: (match: Match) => void
 }
+
+/** A live game the player is about to play (or is playing). */
+export interface Match {
+  clubId: string
+  difficulty: number
+  mode: 'challenge' | 'exhibition'
+  /** Index into the Gym Challenge ladder, for challenge games. */
+  ladderIndex?: number
+  /** Changes every start so a rematch isn't a replay. */
+  seed: string
+}
+
+export const rosterComplete = (r: Roster) => SLOTS.every((s) => r[s])
 
 const takenIds = (r: Roster) => new Set(Object.values(r).map((p) => p!.id))
 
@@ -82,6 +100,8 @@ export const useGame = create<GameState>((set, get) => ({
   teamName: 'Pallet Town Pokéballers',
   season: null,
   revealed: 0,
+  arenaFrom: 'draft',
+  match: null,
 
   start: (mode, seed) => {
     const s = seed ?? (mode === 'daily' ? dailySeed() : randomSeed())
@@ -169,5 +189,11 @@ export const useGame = create<GameState>((set, get) => ({
 
   setRevealed: (revealed) => set({ revealed }),
   goto: (screen) => set({ screen }),
-  reset: () => set({ screen: 'home', current: null, selected: null, season: null }),
+  reset: () => set({ screen: 'home', current: null, selected: null, season: null, match: null }),
+  openArena: () => {
+    const { roster, screen } = get()
+    if (!rosterComplete(roster)) return
+    set({ screen: 'arena', arenaFrom: screen === 'arena' || screen === 'game' ? get().arenaFrom : screen })
+  },
+  startMatch: (match) => set({ match, screen: 'game' }),
 }))

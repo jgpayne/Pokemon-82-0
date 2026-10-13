@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Dices, Play, RefreshCw, Sparkles } from 'lucide-react'
+import { Dices, Gamepad2, Play, RefreshCw, Sparkles } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { CourtBoard } from '../components/CourtBoard'
 import { PokemonCard } from '../components/PokemonCard'
@@ -140,7 +140,7 @@ export function Draft() {
 }
 
 function Ready() {
-  const { teamName, setTeamName, simulate } = useGame()
+  const { teamName, setTeamName, simulate, openArena } = useGame()
   return (
     <Panel className="relative overflow-hidden p-6">
       <div className="stripes pointer-events-none absolute inset-0 opacity-40" />
@@ -156,10 +156,17 @@ function Ready() {
             className="min-h-12 w-full rounded-xl bg-slate-950 px-4 text-lg ring-2 ring-line outline-none focus:ring-accent"
           />
         </label>
-        <p className="text-sm text-muted">You can still rearrange positions on the court. When you're happy, simulate the 82-game season.</p>
-        <Button size="lg" variant="accent" className="w-full" onClick={simulate} disabled={!teamName.trim()}>
-          <Play className="h-6 w-6" aria-hidden /> Simulate 82 games
-        </Button>
+        <p className="text-sm text-muted">
+          You can still rearrange positions on the court. Simulate the 82-game season, or take the court yourself in the Gym Challenge.
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button size="lg" variant="accent" className="w-full" onClick={simulate} disabled={!teamName.trim()}>
+            <Play className="h-6 w-6" aria-hidden /> Simulate 82
+          </Button>
+          <Button size="lg" variant="primary" className="w-full" onClick={openArena} disabled={!teamName.trim()}>
+            <Gamepad2 className="h-6 w-6" aria-hidden /> Play games
+          </Button>
+        </div>
       </div>
     </Panel>
   )
