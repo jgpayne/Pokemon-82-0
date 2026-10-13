@@ -5,5 +5,8 @@ FROM alpine:3.20
 COPY --from=cloudflared /usr/local/bin/cloudflared /usr/local/bin/cloudflared
 COPY tunnel-entrypoint.sh /entrypoint.sh
 # Strip CRLF in case the repo was checked out on Windows before .gitattributes applied.
-RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh \
+  && adduser -D -H -u 10001 cloudflared
+# cloudflared needs no root; the tunnel token lives in this container's env.
+USER cloudflared
 ENTRYPOINT ["/entrypoint.sh"]

@@ -43,7 +43,8 @@ docker compose up --build -d
 ./scripts/tunnel-url.sh       # prints https://<random>.trycloudflare.com
 ```
 
-- The game is at http://localhost:8080 (change with `PORT` in `.env`).
+- The game is at http://localhost:8080 (change with `PORT` in `.env`). The port is only published on this machine by
+  default; set `BIND_ADDRESS=0.0.0.0` in `.env` to open it to other devices on your network.
 - The `tunnel` service runs `cloudflared`. With no token it opens a **free quick tunnel** — no Cloudflare account needed —
   and prints a public `https://*.trycloudflare.com` URL (new URL each restart; also visible with `docker compose logs tunnel`).
   `docker compose ps` shows the tunnel as `healthy` only while it is connected to Cloudflare.
@@ -54,7 +55,21 @@ docker compose up --build -d
   firewall is dropping it: cloudflared keeps retrying other Cloudflare servers and may connect after a minute or two, but a
   network that blocks 7844 entirely (common on corporate/managed networks) can't run the tunnel.
 - For a **stable URL on your own domain**, create a tunnel in Cloudflare Zero Trust → Networks → Tunnels, point its public
-  hostname at `http://web:80`, and put the token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. The same compose file then runs it as a named tunnel.
+  hostname at `http://web:8080`, and put the token in `.env` as `CLOUDFLARE_TUNNEL_TOKEN`. The same compose file then runs it as a named tunnel.
+
+### Security
+
+- Static site only: no backend, accounts or user data leave the browser (best record is kept in `localStorage`).
+- nginx sends a strict Content-Security-Policy (self-hosted scripts, fonts and images only; no inline scripts or `eval`)
+  plus `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, COOP and HSTS
+  (`docker/security-headers.conf`, mirrored in `public/_headers` for Cloudflare Pages). It hides its version, only
+  allows `GET`/`HEAD`, and never serves dotfiles.
+- Both containers run as non-root users with read-only filesystems, all Linux capabilities dropped and
+  `no-new-privileges`. The web port is published on `127.0.0.1` only; the tunnel reaches it over Docker's network.
+- CI uses a read-only `GITHUB_TOKEN`, actions pinned to commit SHAs and an exact `wrangler` version. For Pages deploys,
+  give the Cloudflare API token only the "Cloudflare Pages: Edit" permission.
+- On your domain in Cloudflare, also turn on **Always Use HTTPS** and set SSL/TLS to **Full (strict)** if you ever
+  point it at an origin directly instead of the tunnel.
 
 ### Permanent free `*.pages.dev` link (optional)
 

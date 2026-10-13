@@ -4,12 +4,19 @@ on:
   push:
   pull_request:
 
+# Read-only GITHUB_TOKEN by default; no job here needs to write to the repo.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Third-party actions are pinned to full commit SHAs (tag in the comment).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -17,13 +24,14 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dist
           path: dist
 
   # Optional: permanent free https://<project>.pages.dev link. Runs only on main
-  # once CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID repo secrets exist.
+  # once CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID secrets exist. Give the
+  # API token only the "Cloudflare Pages: Edit" permission.
   deploy-pages:
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -32,8 +40,10 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'poke-82-0' }}
+      # Exact version so a new upstream release never runs with the API token unreviewed.
+      WRANGLER: wrangler@3.114.17
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: env.CLOUDFLARE_API_TOKEN != ''
         with:
           name: dist
@@ -41,5 +51,5 @@ jobs:
       - name: Deploy to Cloudflare Pages
         if: env.CLOUDFLARE_API_TOKEN != ''
         run: |
-          npx --yes wrangler@3 pages project create "$PROJECT" --production-branch main || true
-          npx --yes wrangler@3 pages deploy dist --project-name "$PROJECT" --branch main
+          npx --yes "$WRANGLER" pages project create "$PROJECT" --production-branch main || true
+          npx --yes "$WRANGLER" pages deploy dist --project-name "$PROJECT" --branch main

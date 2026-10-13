@@ -3,7 +3,15 @@ services:
     build: .
     image: poke-82-0:latest
     ports:
-      - "${PORT:-8080}:80"
+      # Localhost only: the tunnel reaches web over Docker's internal network,
+      # so the plain-HTTP port doesn't need to be open to the LAN/internet.
+      # Set BIND_ADDRESS=0.0.0.0 in .env to open it to your network.
+      - "${BIND_ADDRESS:-127.0.0.1}:${PORT:-8080}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     restart: unless-stopped
 
   tunnel:
@@ -13,7 +21,7 @@ services:
     image: poke-82-0-tunnel:latest
     environment:
       CLOUDFLARE_TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
-      TUNNEL_TARGET: http://web:80
+      TUNNEL_TARGET: http://web:8080
       TUNNEL_PROTOCOL: ${TUNNEL_PROTOCOL:-http2}
     healthcheck:
       # Healthy only while at least one connection to Cloudflare is registered.
@@ -23,6 +31,9 @@ services:
       # cloudflared may need a few minutes of retries on firewalled networks.
       start_period: 3m
       retries: 3
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
     depends_on:
       web:
         condition: service_healthy

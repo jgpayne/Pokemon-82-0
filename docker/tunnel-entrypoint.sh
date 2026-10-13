@@ -8,7 +8,7 @@
 # often dropped by home routers and Docker Desktop, leaving the URL up but
 # unconnected (Cloudflare error 1033), so this defaults to HTTP/2.
 set -e
-TARGET="${TUNNEL_TARGET:-http://web:80}"
+TARGET="${TUNNEL_TARGET:-http://web:8080}"
 PROTOCOL="${TUNNEL_PROTOCOL:-http2}"
 # /ready on this port backs the container healthcheck.
 COMMON="--no-autoupdate --protocol $PROTOCOL --metrics 0.0.0.0:2000"
