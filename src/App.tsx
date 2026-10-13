@@ -3,7 +3,9 @@ import { Home as HomeIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { Logo } from './components/ui'
+import { Arena } from './screens/Arena'
 import { Draft } from './screens/Draft'
+import { Game } from './screens/Game'
 import { Home } from './screens/Home'
 import { Playoffs } from './screens/Playoffs'
 import { Results } from './screens/Results'
@@ -44,7 +46,7 @@ export default function App() {
           </button>
           {screen !== 'home' && (
             <>
-              <nav aria-label="Progress" className="ml-auto hidden items-center gap-1 text-xs sm:flex">
+              <nav aria-label="Progress" className={`ml-auto hidden items-center gap-1 text-xs ${screen === 'arena' || screen === 'game' ? '' : 'sm:flex'}`}>
                 {STEPS.map((s, i) => {
                   const active = s === screen
                   const past = STEPS.indexOf(screen as (typeof STEPS)[number]) > i
@@ -59,7 +61,7 @@ export default function App() {
                   )
                 })}
               </nav>
-              <span className="ml-auto rounded-full bg-white/5 px-3 py-1 text-xs text-muted ring-1 ring-line sm:ml-2">{mode === 'daily' ? 'Daily' : 'Free play'}</span>
+              <span className={`ml-auto rounded-full bg-white/5 px-3 py-1 text-xs text-muted ring-1 ring-line ${screen === 'arena' || screen === 'game' ? '' : 'sm:ml-2'}`}>{mode === 'daily' ? 'Daily' : 'Free play'}</span>
               <button onClick={reset} className="grid h-11 w-11 cursor-pointer place-items-center rounded-xl hover:bg-white/10" aria-label="Quit to home">
                 <HomeIcon className="h-5 w-5" />
               </button>
@@ -75,11 +77,15 @@ export default function App() {
           {screen === 'season' && <Season />}
           {screen === 'playoffs' && <Playoffs />}
           {screen === 'results' && <Results />}
+          {screen === 'arena' && <Arena />}
+          {screen === 'game' && <Game />}
         </ErrorBoundary>
       </motion.main>
-      <footer className="px-4 pb-8 text-center text-xs text-muted">
+      {screen !== 'game' && (
+        <footer className="px-4 pb-8 text-center text-xs text-muted">
         Fan project. Pokémon and Pokémon character names are trademarks of Nintendo / Game Freak / The Pokémon Company. Data & art via PokeAPI.
       </footer>
+      )}
     </MotionConfig>
   )
 }

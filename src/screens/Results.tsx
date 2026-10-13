@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti'
 import { motion, useReducedMotion } from 'framer-motion'
-import { Check, Copy, RotateCcw, Shuffle } from 'lucide-react'
+import { Check, Copy, Gamepad2, RotateCcw, Shuffle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Button, OvrChip, Panel, Sprite } from '../components/ui'
 import { cx } from '../lib/cx'
@@ -70,7 +70,10 @@ export function Results() {
           <Button variant="accent" onClick={share}>
             {copied ? <Check className="h-5 w-5" aria-hidden /> : <Copy className="h-5 w-5" aria-hidden />} {copied ? 'Copied!' : 'Share result'}
           </Button>
-          <Button variant="primary" onClick={() => g.start('free')}>
+          <Button variant="primary" onClick={() => g.openArena()}>
+            <Gamepad2 className="h-5 w-5" aria-hidden /> Play the Gym Challenge
+          </Button>
+          <Button variant="ghost" onClick={() => g.start('free')}>
             <Shuffle className="h-5 w-5" aria-hidden /> New draft
           </Button>
           <Button variant="ghost" onClick={() => g.start(g.mode, season.seed)}>
